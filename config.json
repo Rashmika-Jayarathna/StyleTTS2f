@@ -1,0 +1,115 @@
+# ---- Pretrained model paths ----
+ASR_config: "Utils/ASR/config.yml"          # change to absolute path if needed
+ASR_path:   "Utils/ASR/epoch_00080.pth"     # pretrained ASR checkpoint
+F0_path:    "Utils/JDC/bst.t7"              # JDC F0 model
+PLBERT_dir: "Utils/PLBERT"                  # directory with PL-BERT files
+
+# ---- Data params ----
+data_params:
+  root_path: "G:/datasets/styletts2"
+  train_data: "G:/datasets/styletts2/dataset/metadata.csv"
+  val_data: "G:/datasets/styletts2/dataset/val_list.txt"
+  OOD_data: "G:/datasets/styletts2/dataset/ood.txt"
+  min_length: 32
+
+# ---- Device / training control ----
+device: "cuda"
+batch_size: 1
+epochs_1st: 500
+epochs_2nd: 25              # not used in first stage but fine to keep
+log_dir: "logs"
+log_interval: 10
+save_freq: 2                # how often to save checkpoints
+max_len: 40                # max mel steps for random crops (like official)
+
+first_stage_path: "first_stage.pth"
+pretrained_model: ""        # leave empty when training from scratch
+load_only_params: true
+
+# ---- Loss params (from official config, safe defaults) ----
+loss_params:
+  TMA_epoch: 4
+  diff_epoch: 0
+  joint_epoch: 0
+  lambda_F0: 1.0
+  lambda_ce: 20.0
+  lambda_diff: 1.0
+  lambda_dur: 1.0
+  lambda_gen: 1.0
+  lambda_mel: 5.0
+  lambda_mono: 1.0
+  lambda_norm: 1.0
+  lambda_s2s: 1.0
+  lambda_slm: 1.0
+  lambda_sty: 1.0
+
+# ---- Optimizer params ----
+optimizer_params:
+  lr: 0.0001
+  bert_lr: 1.0e-5
+  ft_lr: 1.0e-5
+  pct_start: 0.0
+
+# ---- Preprocess / STFT params ----
+preprocess_params:
+  sr: 22050
+  spect_params:
+    n_fft: 1024
+    hop_length: 256
+    win_length: 1024
+    num_mels: 80
+    f_min: 0
+    f_max: 8000
+
+# ---- Model params (must follow StyleTTS2 structure) ----
+model_params:
+  n_mels: 80
+  multispeaker: false
+  n_token: 178          # depends on text frontend; keep default if using same
+  dim_in: 64
+  hidden_dim: 512
+  max_conv_dim: 512
+  n_layer: 3
+  dropout: 0.2
+  max_dur: 50
+  style_dim: 128
+  slm:
+    model: "microsoft/wavlm-base-plus"
+    hidden: 768
+    initial_channel: 64
+    nlayers: 13
+    sr: 16000
+
+  decoder:
+    type: "hifigan"
+    upsample_rates: [10, 5, 3, 2]
+    upsample_kernel_sizes: [20, 10, 6, 4]
+    upsample_initial_channel: 512
+    resblock_kernel_sizes: [3, 7, 11]
+    resblock_dilation_sizes:
+      - [1, 3, 5]
+      - [1, 3, 5]
+      - [1, 3, 5]
+
+  diffusion:
+    embedding_mask_proba: 0.1
+    dist:
+      mean: -3.0
+      std: 1.0
+      sigma_data: 0.19926648961191362
+      estimate_sigma_data: true
+    transformer:
+      num_layers: 3
+      num_heads: 8
+      head_features: 64
+      multiplier: 2
+
+# ---- Optional SLM adversarial params (second stage) ----
+slmadv_params:
+  batch_percentage: 0.5
+  iter: 20
+  max_len: 500
+  min_len: 400
+  scale: 0.01
+  sig: 1.5
+  thresh: 5
