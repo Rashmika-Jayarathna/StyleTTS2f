@@ -95,8 +95,11 @@ class FilePathDataset(torch.utils.data.Dataset):
         self.min_length = min_length
         with open(OOD_data, 'r', encoding='utf-8') as f:
             tl = f.readlines()
-        idx = 1 if '.wav' in tl[0].split('|')[0] else 0
-        self.ptexts = [t.split('|')[idx] for t in tl]
+        if len(tl) == 0:
+            self.ptexts = []            # Just use an empty list instead of crashing
+        else:
+            idx = 1 if '.wav' in tl[0].split('|')[0] else 0
+            self.ptexts = [t.split('|')[idx] for t in tl]
         
         self.root_path = root_path
 
